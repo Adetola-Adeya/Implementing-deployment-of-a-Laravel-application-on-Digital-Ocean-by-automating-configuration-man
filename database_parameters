@@ -1,0 +1,6 @@
+host: localhost
+mysql_user: root
+mysql_root_password: passwordsql
+db_user: detolauser
+user_pass: passworduser
+db_name: detolaaaexampsql
