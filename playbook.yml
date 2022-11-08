@@ -225,6 +225,17 @@
        owner: www-data
        group: www-data
        mode: '0775'
+       
+       
+    - name: Change file permission of bootstrap cache
+      file:
+       path: /var/www/html/laravelpostgre/bootstrap/cache
+       state: directory
+       recurse: yes
+       owner: www-data
+       group: www-data
+       mode: '0775'
+
 
     - name: Copying .env file
       command: cp /var/www/html/laravelpostgre/.env.example /var/www/html/laravelpostgre/.>
