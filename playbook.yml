@@ -194,6 +194,258 @@
       file:
        path: /usr/local/bin/composer
        mode: u+x
+       
+    - name: Clone the project repo into a new directory
+      command: git clone https://github.com/f1amy/laravel-realworld-example-app.git
+
+    - name: Move repo to the right directory
+      command: mv /root/laravel-realworld-example-app /var/www/laravelpostgre
+
+    - name: Giving right permissions to File
+      file:
+       path: /var/www/laravelpostgre
+       recurse: yes
+       owner: root
+       group: root
+
+    - name: changing owner of laravelpostgre
+      file:
+       path: /var/www/laravelpostgre
+       state: directory
+       recurse: yes
+       owner: www-data
+       group: www-data
+       mode: '0775'
+
+    - name: set permissions for laravelpostgre storage
+      file:
+       path: /var/www/laravelpostgre/storage
+       state: directory
+       recurse: yes
+       owner: www-data
+       group: www-data
+       mode: '0775'
+
+    - name: Change file permission of bootstrap cache
+      file:
+       path: /var/www/laravelpostgre/bootstrap/cache
+       state: directory
+       recurse: yes
+       owner: www-data
+       group: www-data
+       mode: '0775'
+
+    - name: Copying .env file
+      command: cp /var/www/laravelpostgre/.env.example /var/www/laravelpostgre/.>
+
+    - name: Create an apache virtual host configuration file
+      ansible.builtin.copy:
+       dest: /var/www/laravelpostgre/.env
+       content: |
+        APP_NAME="Laravel Postgresql App"
+        APP_ENV=local
+        APP_KEY=
+        APP_DEBUG=true
+        APP_URL=http://178.128.171.245
+        APP_PORT=3000
+
+        LOG_CHANNEL=stack
+        LOG_DEPRECATIONS_CHANNEL=null
+        LOG_LEVEL=debug
+
+        DB_CONNECTION=mysql
+        DB_HOST=127.0.0.1
+         DB_PORT=3306
+        DB_DATABASE="{{ db_name }}"
+        DB_USERNAME=root
+        DB_PASSWORD="{{ mysql_root_password }}"
+
+        BROADCAST_DRIVER=log
+        CACHE_DRIVER=file
+        FILESYSTEM_DISK=local
+        QUEUE_CONNECTION=sync
+        SESSION_DRIVER=file
+        SESSION_LIFETIME=120
+        MEMCACHED_HOST=127.0.0.1
+        REDIS_HOST=127.0.0.1
+        REDIS_PASSWORD=null
+        REDIS_PORT=6379
+        MAIL_MAILER=smtp
+        MAIL_HOST=mailhog
+        MAIL_PORT=1025
+        MAIL_USERNAME=null
+        MAIL_PASSWORD=null
+        MAIL_ENCRYPTION=null
+        MAIL_FROM_ADDRESS="hello@example.com"
+        MAIL_FROM_NAME="${APP_NAME}"
+
+        AWS_ACCESS_KEY_ID=
+        AWS_SECRET_ACCESS_KEY=
+        AWS_DEFAULT_REGION=us-east-1
+        AWS_BUCKET=
+        AWS_USE_PATH_STYLE_ENDPOINT=false
+
+        PUSHER_APP_ID=
+        PUSHER_APP_KEY=
+        PUSHER_APP_SECRET=
+        PUSHER_APP_CLUSTER=mt1
+
+        MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+        MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+
+        L5_SWAGGER_GENERATE_ALWAYS=true
+        SAIL_XDEBUG_MODE=develop,debug
+        SAIL_SKIP_CHECKS=true
+
+    - name: Create the web.php file in the routes directory
+      ansible.builtin.copy:
+        dest: /var/www/laravelpostgre/routes/web.php
+        content: |
+                 <?php
+
+                 Route::get('/', function () {
+
+                   return view('welcome');
+                 });
+
+    - name: download and install all requirements in the /var/www/laravelpostgre/c>
+      shell: composer install --no-interaction
+      args:
+       chdir: /var/www/laravelpostgre
+
+    - name: generate app key
+    ansible.builtin.shell: php artisan key:generate
+      args:
+       chdir: /var/www/laravelpostgre
+
+    - name: Run the php artisan:cache
+      ansible.builtin.shell: php artisan config:cache
+      args:
+       chdir: /var/www/laravelpostgre
+
+    - name: Run the php artisan:fresh
+      ansible.builtin.shell: php artisan migrate:fresh
+      args:
+       chdir: /var/www/laravelpostgre
+
+    - name: Run the php artisan seed
+      ansible.builtin.shell: php artisan migrate --seed
+      args:
+       chdir: /var/www/laravelpostgre
+
+    - name: Create an apache virtual host configuration file
+      ansible.builtin.copy:
+       dest: /etc/apache2/sites-available/laravelpostgre.conf
+       content: |
+        <VirtualHost *:80>
+          ServerAdmin contact@examserver.adetolaolubunmi.me
+          ServerName examserver.adetolaolubunmi.me
+          DocumentRoot /var/www/laravelpostgre/public
+          <Directory /var/www/laravelpostgre/public>
+           AllowOverride All
+          </Directory>
+          ErrorLog ${APACHE_LOG_DIR}/error.log
+          CustomLog ${APACHE_LOG_DIR}/access.log combined
+        </VirtualHost>
+
+    - name: Disable default apache page and enable laravel page
+      ansible.builtin.command: a2dissite 000-default.conf
+
+    - name: Enable a2enmod rewrite
+      ansible.builtin.command: a2enmod rewrite
+
+    - name: Enable laravel page
+      ansible.builtin.command: a2ensite laravelpostgre.conf
+
+    - name: Restart apache web server
+      ansible.builtin.command: systemctl reload apache2
+
+
+   
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
 
     - name: Clone the project repo into a new directory
       command: git clone https://github.com/f1amy/laravel-realworld-example-app.git
